@@ -192,7 +192,8 @@ def download_indicators(config, params, **kwargs):
                           "id" in collection]
 
     wanted_keys = set(['added_after'])
-    results = []
+    all_indicators = []
+    seen = set()
     query_params = {k: params[k] for k in params.keys() & wanted_keys}
     if collection_ids:
         for collection_id in collection_ids:
@@ -201,12 +202,15 @@ def download_indicators(config, params, **kwargs):
                 params=query_params, headers={'Accept': 'application/vnd.oasis.stix+json'})
             response = response.get("objects", [])
             filtered_indicators = [indicator for indicator in response if indicator.get("type") == "indicator"]
-            seen = set()
-            deduped_indicators = [x for x in filtered_indicators if
-                                  [x["pattern"] not in seen, seen.add(x["pattern"])][0]]
-            results.append({"indicators": deduped_indicators})
+            for indicator in filtered_indicators:
+                pattern = indicator.get("pattern")
+                if pattern and pattern not in seen:
+                    seen.add(pattern)
+                    all_indicators.append(indicator)
+
+        results = {"indicators": all_indicators}
     else:
-        results.append({"indicators": []})
+        results = {"indicators": all_indicators}
     base_indicator_dir = get_ingestion_base_dir(**kwargs)
     try:
         os.makedirs(base_indicator_dir, exist_ok=True)
