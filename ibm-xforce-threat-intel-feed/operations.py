@@ -1,13 +1,16 @@
-""" 
-Copyright start 
-Copyright (C) 2008 - 2021 Fortinet Inc. 
-All rights reserved. 
-FORTINET CONFIDENTIAL & FORTINET PROPRIETARY SOURCE CODE 
-Copyright end 
 """
-import requests
+Copyright start
+MIT License
+Copyright (c) 2025 Fortinet Inc
+Copyright end
+"""
+
+import requests, os, json
+import uuid
 from connectors.cyops_utilities.builtins import create_file_from_string
 from connectors.core.connector import get_logger, ConnectorError
+from connectors.cyops_utilities.files import get_ingestion_base_dir
+from datetime import datetime
 
 try:
     from integrations.crudhub import trigger_ingest_playbook
@@ -31,10 +34,7 @@ class TaxiiClient(object):
 
     def make_request_taxii(self, endpoint=None, method='GET', data=None, params=None, files=None, headers=None):
         try:
-            if endpoint:
-                url = self.server_url + 'taxii2/' + endpoint
-            else:
-                url = self.server_url + 'taxii2'
+            url = self.server_url + endpoint
             default_header = {'Content-Type': 'application/json'}
             headers = {**default_header, **headers} if headers is not None and headers != '' else default_header
             response = requests.request(method, url, params=params, files=files, data=data, headers=headers,
@@ -104,17 +104,24 @@ def get_output_schema(config, params, **kwargs):
 def get_api_root_information(config, params, **kwargs):
     taxii = TaxiiClient(config)
     params = get_params(params)
-    return taxii.make_request_taxii(params=params, headers={'Accept': 'application/vnd.oasis.taxii+json'})
+    api_root = taxii.make_request_taxii(endpoint='taxii2/', params=params,
+                                        headers={'Accept': 'application/vnd.oasis.taxii+json'})
+    try:
+        resp = api_root['api_roots'][0]
+        return resp
+    except:
+        return 'taxii2/'
 
 
 def get_collections(config, params, **kwargs):
     taxii = TaxiiClient(config)
+    api_root = get_api_root_information(config, params, **kwargs)
     params = get_params(params)
     if params:
-        response = taxii.make_request_taxii(endpoint='collections/' + str(params['collectionID']),
+        response = taxii.make_request_taxii(endpoint=api_root + 'collections/' + str(params['collectionID']),
                                             headers={'Accept': 'application/vnd.oasis.taxii+json'})
     else:
-        response = taxii.make_request_taxii(endpoint='collections',
+        response = taxii.make_request_taxii(endpoint=api_root + 'collections/',
                                             headers={'Accept': 'application/vnd.oasis.taxii+json'})
     if response.get('collections'):
         return response
@@ -124,13 +131,15 @@ def get_collections(config, params, **kwargs):
 
 def get_objects_by_collection_id(config, params, **kwargs):
     taxii = TaxiiClient(config)
+    api_root = get_api_root_information(config, params, **kwargs)
     params = get_params(params)
     wanted_keys = set(['added_after', 'added_before'])
     mode = params.get('output_mode')
     query_params = {k: params[k] for k in params.keys() & wanted_keys}
     try:
-        response = taxii.make_request_taxii(endpoint='collections/' + str(params['collectionID']) + '/objects',
-                                            params=query_params, headers={'Accept': 'application/vnd.oasis.stix+json'})
+        response = taxii.make_request_taxii(
+            endpoint=api_root + 'collections/' + str(params['collectionID']) + '/objects',
+            params=query_params, headers={'Accept': 'application/vnd.oasis.stix+json'})
         response = response.get("objects", [])
         filtered_indicators = [indicator for indicator in response if indicator["type"] == "indicator"]
     except Exception as e:
@@ -152,19 +161,70 @@ def get_objects_by_collection_id(config, params, **kwargs):
 
 def get_manifest_by_collection_id(config, params, **kwargs):
     taxii = TaxiiClient(config)
+    api_root = get_api_root_information(config, params, **kwargs)
     params = get_params(params)
     wanted_keys = set(['added_after', 'added_before'])
     query_params = {k: params[k] for k in params.keys() & wanted_keys}
-    return taxii.make_request_taxii(endpoint='collections/' + str(params['collectionID']) + '/manifest',
+    return taxii.make_request_taxii(endpoint=api_root + 'collections/' + str(params['collectionID']) + '/manifest',
                                     params=query_params, headers={'Accept': 'application/vnd.oasis.taxii+json'})
 
 
 def get_objects_by_object_id(config, params, **kwargs):
     taxii = TaxiiClient(config)
+    api_root = get_api_root_information(config, params, **kwargs)
     params = get_params(params)
     return taxii.make_request_taxii(headers={'Accept': 'application/vnd.oasis.stix+json'},
-                                    endpoint='collections/' + str(params['collectionID']) + '/objects/' + params[
-                                        'objectID'])
+                                    endpoint=api_root + 'collections/' + str(params['collectionID']) + '/objects/' +
+                                             params[
+                                                 'objectID'])
+
+
+def download_indicators(config, params, **kwargs):
+    collection_ids = []
+    config_id = config.get('config_id')
+    api_root = get_api_root_information(config, params={}, **kwargs)
+    taxii = TaxiiClient(config)
+    get_collections_ids = get_collections(config, params={}, **kwargs)
+
+    # Extract IDs if the collections list is not empty
+    if get_collections_ids.get("collections"):
+        collection_ids = [collection.get("id") for collection in get_collections_ids["collections"] if
+                          "id" in collection]
+
+    wanted_keys = set(['added_after'])
+    results = []
+    query_params = {k: params[k] for k in params.keys() & wanted_keys}
+    if collection_ids:
+        for collection_id in collection_ids:
+            response = taxii.make_request_taxii(
+                endpoint=f"{api_root}collections/{collection_id}/objects",
+                params=query_params, headers={'Accept': 'application/vnd.oasis.stix+json'})
+            response = response.get("objects", [])
+            filtered_indicators = [indicator for indicator in response if indicator.get("type") == "indicator"]
+            seen = set()
+            deduped_indicators = [x for x in filtered_indicators if
+                                  [x["pattern"] not in seen, seen.add(x["pattern"])][0]]
+            results.append({"indicators": deduped_indicators})
+    else:
+        results.append({"indicators": []})
+    base_indicator_dir = get_ingestion_base_dir(**kwargs)
+    try:
+        os.makedirs(base_indicator_dir, exist_ok=True)
+    except Exception as e:
+        base_indicator_dir = '/tmp/'
+        logger.warn("Not able to create dir for downloading indicators")
+
+    config_dir = base_indicator_dir + config_id + '/'
+    try:
+        os.makedirs(config_dir, exist_ok=True)
+    except Exception as e:
+        pass
+    file_name = str(uuid.uuid4()) + '.json'
+    file_path = os.path.join(config_dir, file_name)
+    with open(file_path, "w") as json_file:
+        json.dump(results, json_file, indent=2)
+
+    return {"files": [file_path.replace(base_indicator_dir, '')], "last_pull_datetime": datetime.now()}
 
 
 def _check_health(config):
@@ -185,5 +245,6 @@ operations = {
     'get_objects_by_collection_id': get_objects_by_collection_id,
     'get_objects_by_object_id': get_objects_by_object_id,
     'get_manifest_by_collection_id': get_manifest_by_collection_id,
-    'get_output_schema': get_output_schema
+    'get_output_schema': get_output_schema,
+    'download_indicators': download_indicators
 }

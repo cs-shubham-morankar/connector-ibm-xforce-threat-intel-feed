@@ -3,7 +3,7 @@
   "data": [
     {
       "@type": "WorkflowCollection",
-      "name": "Sample - IBM X-Force Threat Intelligence Feed - 2.0.0",
+      "name": "Sample - IBM X-Force Threat Intelligence Feed - 2.1.0",
       "description": "Sample playbooks for \"IBM X-Force Threat Intelligence Feed\" connector. If you are planning to use any of the sample playbooks in your environment, ensure that you clone those playbooks and move them to a different collection, since the sample playbook collection gets deleted during connector upgrade and delete.",
       "visible": true,
       "image": "medium.png",
@@ -149,7 +149,7 @@
                   "collectionID": "{{ vars.item.id }}",
                   "create_pb_id": "6528e062-5a91-496b-acce-433f67726367"
                 },
-                "version": "2.0.0",
+                "version": "2.1.0",
                 "for_each": {
                   "item": "{{vars.steps.Get_All_Collections.data.collections}}",
                   "parallel": false,
@@ -701,7 +701,7 @@
                   "collectionID": "107",
                   "file_response": true
                 },
-                "version": "2.0.0",
+                "version": "2.1.0",
                 "connector": "ibm-xforce-threat-intel-feed",
                 "operation": "get_objects_by_collection_id",
                 "operationTitle": "Get Objects By Collection ID",
