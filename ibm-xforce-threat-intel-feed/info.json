@@ -5,7 +5,7 @@
   "publisher": "Fortinet",
   "cs_approved": true,
   "cs_compatible": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "category": "Threat Intelligence",
   "icon_small_name": "small.png",
   "icon_large_name": "large.png",
@@ -16,7 +16,92 @@
   "ingestion_modes": [
     "scheduled"
   ],
-  "help_online": "https://docs.fortinet.com/document/fortisoar/2.0.0/ibm-x-force-threat-intelligence-feed/253/ibm-x-force-threat-intelligence-feed-v2-0-0",
+  "help_online": "",
+  "ingestion_config_schema": [
+    {
+      "title": "Ingestion Begin From",
+      "name": "last_pull_datetime",
+      "type": "datetime",
+      "tooltip": "Specify the Datetime after which you want to ingest feeds",
+      "required": true,
+      "editable": true,
+      "visible": true
+    },
+    {
+      "title": "Confidence",
+      "name": "confidence",
+      "type": "integer",
+      "tooltip": "Default Confidence score to be set for the feeds, in case the feed record doesn't have a confidence score",
+      "required": false,
+      "editable": true,
+      "visible": true,
+      "value": 50,
+      "validation": {
+        "minlength": 0,
+        "maxlength": 100
+      }
+    },
+    {
+      "title": "Reputation",
+      "name": "reputation",
+      "type": "select",
+      "tooltip": "Default Reputation to be set for the feeds",
+      "required": true,
+      "editable": true,
+      "visible": true,
+      "options": [
+        "Good",
+        "Suspicious",
+        "Malicious",
+        "No Reputation Available",
+        "TBD"
+      ],
+      "value": "Suspicious"
+    },
+    {
+      "title": "TLP",
+      "name": "tlp",
+      "type": "select",
+      "tooltip": "Default TLP to be set for the feeds",
+      "required": false,
+      "editable": true,
+      "visible": true,
+      "options": [
+        "Red",
+        "Amber",
+        "Green",
+        "White"
+      ],
+      "value": "White"
+    },
+    {
+      "title": "Maximum Age (in days)",
+      "name": "expiry",
+      "type": "integer",
+      "tooltip": "Default age for the feeds. The indicator expires on 'valid_until' date unless a different expiry is specified here. If specified, the indicator will be marked expired on valid_until + expiry.",
+      "required": false,
+      "editable": true,
+      "visible": true,
+      "value": 7
+    }
+  ],
+  "ingest_mapping_template": {
+    "tLP": "{{vars.tlp_resolved}}",
+    "value": "{{vars.pattern.split('= ')[-1].strip().replace(\" \",\"\")[1:-2]}}",
+    "source": "IBM X-Force",
+    "created": "{% if vars.created %}{{epoch_to_datetime(arrow.get(vars.created).int_timestamp + (vars.created | int)*24*60*60)}}{% else %}None{% endif %}",
+    "pattern": "{{ vars.pattern }}",
+    "modified": "{% if vars.modified %}{{epoch_to_datetime(arrow.get(vars.modified).int_timestamp + (vars.modified | int)*24*60*60)}}{% else %}None{% endif %}",
+    "sourceId": "{{ vars.id }}",
+    "__replace": "",
+    "expiresOn": "{% if vars.expiry %}{{epoch_to_datetime(arrow.get(vars.expiry).int_timestamp + (vars.expiry | int)*24*60*60)}}{% else %}None{% endif %}",
+    "validFrom": "{% if vars.valid_from %}{{epoch_to_datetime(arrow.get(vars.valid_from).int_timestamp + (vars.valid_from | int)*24*60*60)}}{% else %}None{% endif %}",
+    "confidence": "{% if vars.confidence %}{{ vars.confidence }}{% endif %}",
+    "reputation": "{% if vars.reputation %}{{ vars.reputation }}{% endif %}",
+    "sourceData": "{{ vars | toJSON}}",
+    "typeOfFeed": "",
+    "description": "<p>{{ vars.description }}</p>"
+  },
   "configuration": {
     "fields": [
       {
@@ -189,6 +274,48 @@
               }
             ]
           }
+        }
+      ],
+      "enabled": true
+    },
+    {
+      "operation": "download_indicators",
+      "title": "Download Indicators",
+      "description": "Retrieves all available objects from a collection to which the users have access from IBM X-Force Threat Intelligence Feed, based on the  you have specified.",
+      "category": "investigation",
+      "annotation": "download_indicators",
+      "output_schema": {
+        "indicators": [
+          {
+            "id": "",
+            "name": "",
+            "type": "",
+            "created": "",
+            "pattern": "",
+            "modified": "",
+            "confidence": "",
+            "valid_from": "",
+            "description": "",
+            "pattern_type": "",
+            "spec_version": "",
+            "indicator_types": [
+            ],
+            "pattern_version": "",
+            "object_marking_refs": [
+            ]
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "title": "Last Pull Time",
+          "description": "(Optional) Specify the time the feeds were last pulled from IBM X-Force Threat Intelligence Feed. In this case, the data will be returned from the IBM X-Force Threat Intelligence Feed only if the feed has been refreshed after the specified time.",
+          "type": "datetime",
+          "name": "added_after",
+          "required": false,
+          "editable": true,
+          "visible": true,
+          "tooltip": "(Optional) Specify the time the feeds were last pulled from IBM X-Force Threat Intelligence Feed. In this case, the data will be returned from the IBM X-Force Threat Intelligence Feed only if the feed has been refreshed after the specified time."
         }
       ],
       "enabled": true

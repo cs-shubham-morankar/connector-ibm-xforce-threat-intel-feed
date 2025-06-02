@@ -1,10 +1,10 @@
-""" 
-Copyright start 
-Copyright (C) 2008 - 2021 Fortinet Inc. 
-All rights reserved. 
-FORTINET CONFIDENTIAL & FORTINET PROPRIETARY SOURCE CODE 
-Copyright end 
-""" 
+"""
+Copyright start
+MIT License
+Copyright (c) 2025 Fortinet Inc
+Copyright end
+"""
+
 from connectors.core.connector import Connector, get_logger, ConnectorError
 
 from .operations import operations, _check_health
@@ -17,6 +17,11 @@ class IBMXForceFeed(Connector):
         try:
             logger.info('In execute() Operation: {}'.format(operation))
             operation = operations.get(operation)
+            # todo let call connector take it from _info
+            # now was ingesting it from integration separately
+            # changes for fcp/tip specific so it dsnt break on fsr
+            if 'connector_name' in kwargs:
+                kwargs.pop('connector_name')
             return operation(config, params, **kwargs)
         except Exception as err:
             logger.error('An exception occurred {}'.format(err))
