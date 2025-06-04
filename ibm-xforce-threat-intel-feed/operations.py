@@ -212,12 +212,6 @@ def download_indicators(config, params, **kwargs):
     else:
         results = {"indicators": all_indicators}
     base_indicator_dir = get_ingestion_base_dir(**kwargs)
-    try:
-        os.makedirs(base_indicator_dir, exist_ok=True)
-    except Exception as e:
-        base_indicator_dir = '/tmp/'
-        logger.warn("Not able to create dir for downloading indicators")
-
     config_dir = base_indicator_dir + config_id + '/'
     try:
         os.makedirs(config_dir, exist_ok=True)
@@ -226,7 +220,7 @@ def download_indicators(config, params, **kwargs):
     file_name = str(uuid.uuid4()) + '.json'
     file_path = os.path.join(config_dir, file_name)
     with open(file_path, "w") as json_file:
-        json.dump(results, json_file, indent=2)
+        json.dump(results.get('indicators'), json_file, indent=2)
 
     return {"files": [file_path.replace(base_indicator_dir, '')], "last_pull_datetime": datetime.now()}
 
