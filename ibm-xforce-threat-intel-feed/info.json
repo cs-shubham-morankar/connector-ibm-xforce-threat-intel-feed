@@ -285,26 +285,8 @@
       "category": "investigation",
       "annotation": "download_indicators",
       "output_schema": {
-        "indicators": [
-          {
-            "id": "",
-            "name": "",
-            "type": "",
-            "created": "",
-            "pattern": "",
-            "modified": "",
-            "confidence": "",
-            "valid_from": "",
-            "description": "",
-            "pattern_type": "",
-            "spec_version": "",
-            "indicator_types": [
-            ],
-            "pattern_version": "",
-            "object_marking_refs": [
-            ]
-          }
-        ]
+            "files": [],
+            "last_pull_datetime": ""
       },
       "parameters": [
         {

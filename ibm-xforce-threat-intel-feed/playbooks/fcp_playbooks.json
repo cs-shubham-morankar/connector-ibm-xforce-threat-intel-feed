@@ -1,0 +1,409 @@
+{
+  "type": "playbook_collections",
+  "data": [
+    {
+      "@id": "/api/workflow/playbook-collections/c7858823-8b63-469d-85e6-a2ba71d5f293/",
+      "uuid": "c7858823-8b63-469d-85e6-a2ba71d5f293",
+      "createDate": "2025-06-04T15:36:12.806588Z",
+      "modifyDate": "2025-06-04T15:38:15.696270Z",
+      "deletedAt": null,
+      "name": "Sample - IBM X-Force Threat Intelligence Feed - 2.1.0",
+      "description": "Sample playbooks for \"BruteForceBlocker Feed\" connector. If you are planning to use any of the sample playbooks in your environment, ensure that you clone those playbooks and move them to a different collection, since the sample playbook collection gets deleted during connector upgrade and delete.",
+      "visible": true,
+      "image": null,
+      "importedBy": {},
+      "createUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+      "modifyUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+      "tags": [],
+      "@type": "WorkflowCollection",
+      "playbooks": [
+        {
+          "@id": "/api/workflow/playbooks/fdbc3418-9696-49ee-955e-0cf18b77a9da/",
+          "uuid": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+          "name": "Ingest Indicators",
+          "createDate": "2025-06-04T15:38:15.678831Z",
+          "modifyDate": "2025-06-04T16:03:18.886495Z",
+          "priority": "medium",
+          "triggerLimit": null,
+          "steps": [
+            {
+              "uuid": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+              "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+              "name": "Start",
+              "description": null,
+              "arguments": {
+                "__triggerLimit": true,
+                "step_variables": {
+                  "input": {
+                    "params": []
+                  },
+                  "ingestion_config": "{{ vars.request.data.input.param.ingestion_connector_config.ingestion_config }}",
+                  "ingestion_config_id": "{{ vars.request.data.input.param.ingestion_connector_config.config_id }}",
+                  "ingest_mapping_template": "{{ vars.request.data.input.param.ingestion_connector_config.ingest_mapping_template }}",
+                  "ingestion_last_pull_datetime": "{{ vars.request.data.input.param.ingestion_connector_config.ingestion_config.last_pull_datetime }}"
+                },
+                "triggerOnSource": true,
+                "triggerOnReplicate": false
+              },
+              "status": null,
+              "top": "50",
+              "left": "50",
+              "workflowgroup": null,
+              "stepType": "b348f017-9a94-471f-87f8-ce88b6a7ad62",
+              "@type": "WorkflowStep"
+            },
+            {
+              "uuid": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+              "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+              "name": "Download Indicators",
+              "description": null,
+              "arguments": {
+                "name": "IBM X-Force Threat Intelligence Feed",
+                "config": "{{ vars.ingestion_config_id }}",
+                "params": {
+                  "added_after": "{{ vars.ingestion_last_pull_datetime }}"
+                },
+                "version": "2.1.0",
+                "connector": "ibm-xforce-threat-intel-feed",
+                "operation": "download_indicators",
+                "pickFromTenant": false
+              },
+              "status": null,
+              "top": "133",
+              "left": "358",
+              "workflowgroup": null,
+              "stepType": "0bfed618-0316-11e7-93ae-92361f002671",
+              "@type": "WorkflowStep"
+            },
+            {
+              "uuid": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780",
+              "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+              "name": "Ingest Indicators",
+              "description": null,
+              "arguments": {
+                "name": "Data Ingestion Helper",
+                "agent": "1948944_deploy_10002",
+                "config": "",
+                "params": {
+                  "source": "{{ vars.steps[\"Download Indicators\"].data.files }}",
+                  "service": "tip",
+                  "entity_type": "indicators",
+                  "ingest_config": "{{ vars.ingestion_config }}",
+                  "transform_template": "{{ vars.ingest_mapping_template }}",
+                  "connector_config_id": "{{ vars.ingestion_config_id }}",
+                  "updated_last_pull_time": "{{ vars.steps[\"Download Indicators\"].data.last_pull_datetime }}"
+                },
+                "version": "1.0.0",
+                "connector": "dih",
+                "operation": "ingest_indicator",
+                "pickFromTenant": false
+              },
+              "status": null,
+              "top": "172",
+              "left": "766",
+              "workflowgroup": null,
+              "stepType": "0bfed618-0316-11e7-93ae-92361f002671",
+              "@type": "WorkflowStep"
+            }
+          ],
+          "routes": [
+            {
+              "@id": "/api/workflow/playbook-routes/c6a9916c-3611-4c21-a242-b97d61183c0e/",
+              "uuid": "c6a9916c-3611-4c21-a242-b97d61183c0e",
+              "name": "Start->Download Indicators",
+              "data": {
+                "label": ""
+              },
+              "isExecuted": false,
+              "sourcestep": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+              "targetstep": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+              "workflowgroup": null,
+              "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+              "@type": "WorkflowRoute"
+            },
+            {
+              "@id": "/api/workflow/playbook-routes/413420d1-9643-4034-9db3-a8205e9c7487/",
+              "uuid": "413420d1-9643-4034-9db3-a8205e9c7487",
+              "name": "Download Indicators->Ingest Indicators",
+              "data": {
+                "label": ""
+              },
+              "isExecuted": false,
+              "sourcestep": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+              "targetstep": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780",
+              "workflowgroup": null,
+              "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+              "@type": "WorkflowRoute"
+            }
+          ],
+          "groups": [],
+          "aliasName": null,
+          "tags": [
+            "fcp",
+            "dataingestion"
+          ],
+          "description": "This playbook will fetch the indicators from IBM X-Force Threat Intelligence and ingest in threat intel service",
+          "isActive": false,
+          "debug": true,
+          "singleRecordExecution": false,
+          "remoteExecutableFlag": false,
+          "parameters": null,
+          "synchronous": false,
+          "isPrivate": false,
+          "pinned": false,
+          "lastModifyDate": 1749052998,
+          "deletedAt": null,
+          "importedBy": null,
+          "collection": {
+            "@id": "/api/workflow/playbook-collections/c7858823-8b63-469d-85e6-a2ba71d5f293/",
+            "uuid": "c7858823-8b63-469d-85e6-a2ba71d5f293",
+            "createDate": "2025-06-04T15:36:12.806588Z",
+            "modifyDate": "2025-06-04T15:38:15.696270Z",
+            "deletedAt": null,
+            "name": "Sample - IBM X-Force Threat Intelligence Feed - 2.1.0",
+            "description": "Sample playbooks for \"BruteForceBlocker Feed\" connector. If you are planning to use any of the sample playbooks in your environment, ensure that you clone those playbooks and move them to a different collection, since the sample playbook collection gets deleted during connector upgrade and delete.",
+            "visible": true,
+            "image": null,
+            "importedBy": {},
+            "createUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+            "modifyUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+            "tags": [],
+            "@type": "WorkflowCollection"
+          },
+          "triggerstep": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+          "createUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+          "modifyUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+          "@type": "Workflow"
+        }
+      ]
+    }
+  ],
+  "versions": [
+    {
+      "uuid": "7e3dbf62-ecb0-421d-997d-eccda866ff4d",
+      "createDate": "2025-06-04T15:38:15.722295Z",
+      "modifyDate": "2025-06-04T16:03:18.838442Z",
+      "deletedAt": null,
+      "name": "Draft",
+      "workflow_name": "Ingest Indicators",
+      "note": null,
+      "json": {
+        "uuid": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+        "debug": true,
+        "steps": [
+          {
+            "id": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+            "top": 50,
+            "left": 50,
+            "name": "Start",
+            "uuid": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+            "group": null,
+            "stepType": "b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "arguments": {
+              "__triggerLimit": true,
+              "step_variables": {
+                "input": {
+                  "params": []
+                },
+                "ingestion_config": "{{ vars.request.data.input.param.ingestion_connector_config.ingestion_config }}",
+                "ingestion_config_id": "{{ vars.request.data.input.param.ingestion_connector_config.config_id }}",
+                "ingest_mapping_template": "{{ vars.request.data.input.param.ingestion_connector_config.ingest_mapping_template }}",
+                "ingestion_last_pull_datetime": "{{ vars.request.data.input.param.ingestion_connector_config.ingestion_config.last_pull_datetime }}"
+              },
+              "triggerOnSource": true,
+              "triggerOnReplicate": false
+            }
+          },
+          {
+            "id": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+            "top": 133,
+            "left": 358,
+            "name": "Download Indicators",
+            "uuid": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+            "group": null,
+            "stepType": "0bfed618-0316-11e7-93ae-92361f002671",
+            "arguments": {
+              "name": "IBM X-Force Threat Intelligence Feed",
+              "config": "{{ vars.ingestion_config_id }}",
+              "params": {
+                "added_after": "{{ vars.ingestion_last_pull_datetime }}"
+              },
+              "version": "2.1.0",
+              "connector": "ibm-xforce-threat-intel-feed",
+              "operation": "download_indicators",
+              "pickFromTenant": false
+            }
+          },
+          {
+            "id": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780",
+            "top": 172,
+            "left": 766,
+            "name": "Ingest Indicators",
+            "uuid": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780",
+            "group": null,
+            "stepType": "0bfed618-0316-11e7-93ae-92361f002671",
+            "arguments": {
+              "name": "Data Ingestion Helper",
+              "agent": "1948944_deploy_10002",
+              "config": "",
+              "params": {
+                "source": "{{ vars.steps[\"Download Indicators\"].data.files }}",
+                "service": "tip",
+                "entity_type": "indicators",
+                "ingest_config": "{{ vars.ingestion_config }}",
+                "transform_template": "{{ vars.ingest_mapping_template }}",
+                "connector_config_id": "{{ vars.ingestion_config_id }}",
+                "updated_last_pull_time": "{{ vars.steps[\"Download Indicators\"].data.last_pull_datetime }}"
+              },
+              "version": "1.0.0",
+              "connector": "dih",
+              "operation": "ingest_indicator",
+              "pickFromTenant": false
+            }
+          }
+        ],
+        "groups": [],
+        "routes": [
+          {
+            "data": {
+              "label": ""
+            },
+            "name": "Start->Download Indicators",
+            "uuid": "c6a9916c-3611-4c21-a242-b97d61183c0e",
+            "sourcestep": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+            "targetstep": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce"
+          },
+          {
+            "data": {
+              "label": ""
+            },
+            "name": "Download Indicators->Ingest Indicators",
+            "uuid": "413420d1-9643-4034-9db3-a8205e9c7487",
+            "sourcestep": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+            "targetstep": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780"
+          }
+        ],
+        "parameters": null,
+        "triggerstep": "497075ef-923c-4102-acc8-fd3b892ed7a9"
+      },
+      "draft": true,
+      "published": false,
+      "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+      "createUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+      "modifyUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0"
+    },
+    {
+      "uuid": "ca182b47-ec55-404c-82ba-a226f5498e0c",
+      "createDate": "2025-06-04T16:03:18.863376Z",
+      "modifyDate": "2025-06-04T16:03:18.863387Z",
+      "deletedAt": null,
+      "name": "Version 2",
+      "workflow_name": "Ingest Indicators",
+      "note": "Published version",
+      "json": {
+        "uuid": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+        "debug": true,
+        "steps": [
+          {
+            "id": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+            "top": 50,
+            "left": 50,
+            "name": "Start",
+            "uuid": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+            "group": null,
+            "stepType": "b348f017-9a94-471f-87f8-ce88b6a7ad62",
+            "arguments": {
+              "__triggerLimit": true,
+              "step_variables": {
+                "input": {
+                  "params": []
+                },
+                "ingestion_config": "{{ vars.request.data.input.param.ingestion_connector_config.ingestion_config }}",
+                "ingestion_config_id": "{{ vars.request.data.input.param.ingestion_connector_config.config_id }}",
+                "ingest_mapping_template": "{{ vars.request.data.input.param.ingestion_connector_config.ingest_mapping_template }}",
+                "ingestion_last_pull_datetime": "{{ vars.request.data.input.param.ingestion_connector_config.ingestion_config.last_pull_datetime }}"
+              },
+              "triggerOnSource": true,
+              "triggerOnReplicate": false
+            }
+          },
+          {
+            "id": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+            "top": 133,
+            "left": 358,
+            "name": "Download Indicators",
+            "uuid": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+            "group": null,
+            "stepType": "0bfed618-0316-11e7-93ae-92361f002671",
+            "arguments": {
+              "name": "IBM X-Force Threat Intelligence Feed",
+              "config": "{{ vars.ingestion_config_id }}",
+              "params": {
+                "added_after": "{{ vars.ingestion_last_pull_datetime }}"
+              },
+              "version": "2.1.0",
+              "connector": "ibm-xforce-threat-intel-feed",
+              "operation": "download_indicators",
+              "pickFromTenant": false
+            }
+          },
+          {
+            "id": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780",
+            "top": 172,
+            "left": 766,
+            "name": "Ingest Indicators",
+            "uuid": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780",
+            "group": null,
+            "stepType": "0bfed618-0316-11e7-93ae-92361f002671",
+            "arguments": {
+              "name": "Data Ingestion Helper",
+              "agent": "1948944_deploy_10002",
+              "config": "",
+              "params": {
+                "source": "{{ vars.steps[\"Download Indicators\"].data.files }}",
+                "service": "tip",
+                "entity_type": "indicators",
+                "ingest_config": "{{ vars.ingestion_config }}",
+                "transform_template": "{{ vars.ingest_mapping_template }}",
+                "connector_config_id": "{{ vars.ingestion_config_id }}",
+                "updated_last_pull_time": "{{ vars.steps[\"Download Indicators\"].data.last_pull_datetime }}"
+              },
+              "version": "1.0.0",
+              "connector": "dih",
+              "operation": "ingest_indicator",
+              "pickFromTenant": false
+            }
+          }
+        ],
+        "groups": [],
+        "routes": [
+          {
+            "data": {
+              "label": ""
+            },
+            "name": "Start->Download Indicators",
+            "uuid": "c6a9916c-3611-4c21-a242-b97d61183c0e",
+            "sourcestep": "497075ef-923c-4102-acc8-fd3b892ed7a9",
+            "targetstep": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce"
+          },
+          {
+            "data": {
+              "label": ""
+            },
+            "name": "Download Indicators->Ingest Indicators",
+            "uuid": "413420d1-9643-4034-9db3-a8205e9c7487",
+            "sourcestep": "9fda9acf-d5bb-4d0e-81ea-19cfaef8c1ce",
+            "targetstep": "a24c4cdb-442c-4a2d-8456-0b6e7f11a780"
+          }
+        ],
+        "parameters": null,
+        "triggerstep": "497075ef-923c-4102-acc8-fd3b892ed7a9"
+      },
+      "draft": false,
+      "published": true,
+      "workflow": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
+      "createUser": "a73b059f-ee09-4668-a2d9-0260c91f2cc0",
+      "modifyUser": null
+    }
+  ]
+}
