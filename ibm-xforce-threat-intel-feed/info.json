@@ -86,21 +86,22 @@
     }
   ],
   "ingest_mapping_template": {
-    "tLP": "{{vars.tlp_resolved}}",
+    "tlp": "{% if vars.tlp %}{{ vars.tlp }}{% endif %}",
     "value": "{{vars.pattern.split('= ')[-1].strip().replace(\" \",\"\")[1:-2]}}",
     "source": "IBM X-Force",
-    "created": "{% if vars.created %}{{epoch_to_datetime(arrow.get(vars.created).int_timestamp + (vars.created | int)*24*60*60)}}{% else %}None{% endif %}",
     "pattern": "{{ vars.pattern }}",
-    "modified": "{% if vars.modified %}{{epoch_to_datetime(arrow.get(vars.modified).int_timestamp + (vars.modified | int)*24*60*60)}}{% else %}None{% endif %}",
-    "sourceId": "{{ vars.id }}",
+    "created_on": "{% if vars.created %}{{epoch_to_datetime(arrow.get(vars.created).int_timestamp + (vars.created | int)*24*60*60)}}{% else %}{{ epoch_to_datetime(arrow.utcnow().int_timestamp) }}{% endif %}",
+    "modified_on": "{% if vars.modified %}{{epoch_to_datetime(arrow.get(vars.modified).int_timestamp + (vars.modified | int)*24*60*60)}}{% else %}{{ epoch_to_datetime(arrow.utcnow().int_timestamp) }}{% endif %}",
+    "source_id": "{{ vars.id }}",
     "__replace": "",
-    "expiresOn": "{% if vars.expiry %}{{epoch_to_datetime(arrow.get(vars.expiry).int_timestamp + (vars.expiry | int)*24*60*60)}}{% else %}None{% endif %}",
-    "validFrom": "{% if vars.valid_from %}{{epoch_to_datetime(arrow.get(vars.valid_from).int_timestamp + (vars.valid_from | int)*24*60*60)}}{% else %}None{% endif %}",
+    "expires_on": "{% if vars.expiry %}{{ epoch_to_datetime(arrow.utcnow().int_timestamp + (vars.expiry | int)*24*60*60) }}{% else %}None{% endif %}",
+    "valid_from": "{% if vars.valid_from %}{{epoch_to_datetime(arrow.get(vars.valid_from).int_timestamp + (vars.valid_from | int)*24*60*60)}}{% else %}{{ epoch_to_datetime(arrow.utcnow().int_timestamp) }}{% endif %}",
+    "valid_until": "{% if vars.valid_until %}{{ epoch_to_datetime(arrow.get(vars.valid_until).int_timestamp + (vars.expiry | int)*24*60*60) }}{% else %}{{ epoch_to_datetime(arrow.utcnow().int_timestamp + (vars.expiry | int)*24*60*60) }}{% endif %}",
     "confidence": "{% if vars.confidence %}{{ vars.confidence }}{% endif %}",
     "reputation": "{% if vars.reputation %}{{ vars.reputation }}{% endif %}",
     "sourceData": "{{ vars | toJSON}}",
-    "typeOfFeed": "",
-    "description": "<p>{{ vars.description }}</p>"
+    "type_of_feed": "{{ vars.type }}",
+    "description": "{{ vars.description }}"
   },
   "configuration": {
     "fields": [
@@ -154,12 +155,10 @@
       "output_schema": {
         "title": "",
         "description": "",
-        "versions": [
-        ],
+        "versions": [],
         "max_content_length": ""
       },
-      "parameters": [
-      ],
+      "parameters": [],
       "enabled": true
     },
     {
@@ -175,8 +174,7 @@
             "title": "",
             "can_read": "",
             "can_write": "",
-            "media_types": [
-            ]
+            "media_types": []
           }
         ]
       },
@@ -285,8 +283,8 @@
       "category": "investigation",
       "annotation": "download_indicators",
       "output_schema": {
-            "files": [],
-            "last_pull_datetime": ""
+        "files": [],
+        "last_pull_datetime": ""
       },
       "parameters": [
         {
@@ -327,8 +325,7 @@
             "type": "",
             "created": "",
             "modified": "",
-            "labels": [
-            ],
+            "labels": [],
             "name": "",
             "description": "",
             "pattern": "",
@@ -372,8 +369,7 @@
           {
             "id": "",
             "date_added": "",
-            "media_type": [
-            ]
+            "media_type": []
           }
         ]
       },
