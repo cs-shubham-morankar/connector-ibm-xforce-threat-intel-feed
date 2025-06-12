@@ -101,7 +101,7 @@
     "reputation": "{% if vars.reputation %}{{ vars.reputation }}{% endif %}",
     "sourceData": "{{ vars | toJSON}}",
     "type_of_feed": "{{ vars.type }}",
-    "description": "{{ vars.description }}"
+    "description": "{% if vars.description %}{{ vars.description }}{% else %} Threat Indicator from IBM X-Force for pattern: {{ vars.pattern }}}{% endif %}"
   },
   "configuration": {
     "fields": [
