@@ -100,7 +100,7 @@
     "confidence": "{% if vars.confidence %}{{ vars.confidence }}{% endif %}",
     "reputation": "{% if vars.reputation %}{{ vars.reputation }}{% endif %}",
     "sourceData": "{{ vars | toJSON}}",
-    "type_of_feed": "{{ vars.type }}",
+    "type_of_feed": "{% if vars.pattern %}{{ vars.pattern.split(\" =\")[0].strip()[1:].replace(\":\", \"-\").replace(\".\", \"-\").replace(\"'\", \"\").replace(\" \", \"\") }}{% else %}None{% endif %}",
     "description": "{% if vars.description %}{{ vars.description }}{% else %} Threat Indicator from IBM X-Force for pattern: {{ vars.pattern }}{% endif %}"
   },
   "configuration": {
