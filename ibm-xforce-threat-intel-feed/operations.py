@@ -6,11 +6,16 @@ Copyright end
 """
 
 import requests, os, json
-import uuid
+import uuid, time
 from connectors.cyops_utilities.builtins import create_file_from_string
 from connectors.core.connector import get_logger, ConnectorError
 from datetime import datetime
-from connectors.cyops_utilities.files import get_ingestion_base_dir
+from .constants import MAX_RETRY, SLEEP
+
+try:
+    from connectors.cyops_utilities.files import get_ingestion_base_dir
+except:
+    pass
 
 try:
     from integrations.crudhub import trigger_ingest_playbook
@@ -37,13 +42,16 @@ class TaxiiClient(object):
             url = self.server_url + endpoint
             default_header = {'Content-Type': 'application/json'}
             headers = {**default_header, **headers} if headers is not None and headers != '' else default_header
-            response = requests.request(method, url, params=params, files=files, data=data, headers=headers,
-                                        verify=self.verify_ssl, auth=(self.api_key, self.api_password))
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(response.text)
-                raise ConnectorError({'status_code': response.status_code, 'message': response.reason})
+            retry = 0
+            while retry < MAX_RETRY:
+                response = requests.request(method, url, params=params, files=files, data=data, headers=headers,
+                                            verify=self.verify_ssl, auth=(self.api_key, self.api_password))
+                if response.status_code == 200:
+                    return response.json()
+                retry += 1
+                time.sleep(SLEEP)
+            logger.error(response.text)
+            raise ConnectorError({'status_code': response.status_code, 'message': response.reason})
         except requests.exceptions.SSLError:
             raise ConnectorError('SSL certificate validation failed')
         except requests.exceptions.ConnectTimeout:
