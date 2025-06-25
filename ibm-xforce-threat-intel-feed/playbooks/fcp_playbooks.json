@@ -20,7 +20,7 @@
         {
           "@id": "/api/workflow/playbooks/fdbc3418-9696-49ee-955e-0cf18b77a9da/",
           "uuid": "fdbc3418-9696-49ee-955e-0cf18b77a9da",
-          "name": "IBM X-Force Intel Indicators Integration",
+          "name": "IBM X-Force Threat Intelligence Feed Ingestion",
           "createDate": "2025-06-10T11:12:05.954520Z",
           "modifyDate": "2025-06-10T13:19:34.243706Z",
           "priority": "medium",
