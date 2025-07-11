@@ -13,6 +13,7 @@ from datetime import datetime
 from .constants import MAX_RETRY, SLEEP
 
 try:
+    from connectors.cyops_utilities.files import save_file_in_env
     from connectors.cyops_utilities.files import get_ingestion_base_dir
 except:
     pass
@@ -229,7 +230,7 @@ def download_indicators(config, params, **kwargs):
     file_path = os.path.join(config_dir, file_name)
     with open(file_path, "w") as json_file:
         json.dump(results.get('indicators'), json_file, indent=2)
-
+    save_file_in_env(kwargs.get('env', {}), file_path)
     return {"files": [file_path.replace(base_indicator_dir, '')], "last_pull_datetime": datetime.now()}
 
 
