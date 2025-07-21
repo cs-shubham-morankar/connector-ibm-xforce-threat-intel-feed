@@ -113,8 +113,9 @@
         "visible": true,
         "type": "text",
         "name": "server_url",
-        "value": "https://api.xforce.ibmcloud.com",
-        "description": "Review the server URL of the IBM X-Force Threat Intelligence Feed server to which you will connect and retrieve data."
+        "placeholder": "For Public X-Force Exchange API use https://api.xforce.ibmcloud.com",
+        "tooltip": "Review the server URL of the IBM X-Force Threat Intelligence Feed server to which you will connect and retrieve data. Note: For Public X-Force Exchange API use server URL: https://api.xforce.ibmcloud.com",
+        "description": "Review the server URL of the IBM X-Force Threat Intelligence Feed server to which you will connect and retrieve data. Note: For Public X-Force Exchange API use server URL: https://api.xforce.ibmcloud.com"
       },
       {
         "title": "API Key",
