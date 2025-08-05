@@ -17,7 +17,7 @@
   "ingestion_modes": [
     "scheduled"
   ],
-  "help_online": "",
+  "help_online": "https://docs.fortinet.com/document/fortisoar/2.1.0/ibm-x-force-threat-intelligence-feed/1754383634/ibm-x-force-threat-intelligence-feed-v2-1-0",
   "ingestion_config_schema": [
     {
       "title": "Ingestion Begin From",
@@ -281,7 +281,7 @@
     {
       "operation": "download_indicators",
       "title": "Download Indicators",
-      "description": "Retrieves all available objects from a collection to which the users have access from IBM X-Force Threat Intelligence Feed, based on the  you have specified.",
+      "description": "Retrieves all available objects from a collection to which the users have access from IBM X-Force Threat Intelligence Feed, based on the input parameters you have specified. This action is currently not supported in FortiSOAR.",
       "category": "investigation",
       "annotation": "download_indicators",
       "output_schema": {
@@ -291,13 +291,13 @@
       "parameters": [
         {
           "title": "Last Pull Time",
-          "description": "(Optional) Specify the time the feeds were last pulled from IBM X-Force Threat Intelligence Feed. In this case, the data will be returned from the IBM X-Force Threat Intelligence Feed only if the feed has been refreshed after the specified time.",
+          "description": "(Optional) Specify the DateTime the feeds were last pulled from IBM X-Force Threat Intelligence Feed. In this case, data will only be returned if the feed has been refreshed after the specified time.",
           "type": "datetime",
           "name": "added_after",
           "required": false,
           "editable": true,
           "visible": true,
-          "tooltip": "(Optional) Specify the time the feeds were last pulled from IBM X-Force Threat Intelligence Feed. In this case, the data will be returned from the IBM X-Force Threat Intelligence Feed only if the feed has been refreshed after the specified time."
+          "tooltip": "(Optional) Specify the DateTime the feeds were last pulled from IBM X-Force Threat Intelligence Feed. In this case, data will only be returned if the feed has been refreshed after the specified time."
         }
       ],
       "enabled": true
